@@ -22,7 +22,7 @@ M.default_options = {
 function M.config()
   require("colorizer").setup({
     filetypes = { "*" },
-    options = M.default_options,
+    user_default_options = M.default_options,
   })
 end
 

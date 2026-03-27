@@ -2,11 +2,62 @@
 
 local M = {}
 
+local AUTO_IMPORT_ACTION_KINDS = {
+  "source.addMissingImports",
+  "source.addMissingImports.ts",
+  "source.organizeImports",
+  "source.organizeImports.ts",
+  "source.fixAll",
+  "source.fixAll.ts",
+}
+
 local function restart_lsp_except_copilot()
   local clients = vim.lsp.get_clients()
   for _, client in ipairs(clients) do
     if client.name ~= "copilot" then
       vim.lsp.stop_client(client.id, true)
+    end
+  end
+end
+
+local function run_auto_import_actions(bufnr)
+  local clients = vim.lsp.get_clients({ bufnr = bufnr })
+  if #clients == 0 then
+    return
+  end
+
+  local has_codeaction = false
+  local encoding = "utf-8"
+  for _, client in ipairs(clients) do
+    encoding = client.offset_encoding or encoding
+    if client.server_capabilities and client.server_capabilities.codeActionProvider then
+      has_codeaction = true
+    end
+  end
+
+  if not has_codeaction then
+    return
+  end
+
+  for _, action_kind in ipairs(AUTO_IMPORT_ACTION_KINDS) do
+    local params = {
+      textDocument = vim.lsp.util.make_text_document_params(bufnr),
+      range = {
+        start = { line = 0, character = 0 },
+        ["end"] = { line = 0, character = 0 },
+      },
+    }
+    params.context = { only = { action_kind } }
+    local result = vim.lsp.buf_request_sync(bufnr, "textDocument/codeAction", params, 1000)
+    for _, res in pairs(result or {}) do
+      for _, action in pairs(res.result or {}) do
+        if action.edit then
+          vim.lsp.util.apply_workspace_edit(action.edit, encoding)
+        end
+        if action.command then
+          vim.lsp.buf.execute_command(action.command)
+        end
+      end
     end
   end
 end
@@ -102,41 +153,8 @@ function M.setup()
   autocmd("BufWritePre", {
     group = lsp_group,
     pattern = { "*.ts", "*.tsx", "*.js", "*.jsx", "*.py", "*.go", "*.rs", "*.scala" },
-    callback = function()
-      pcall(function()
-        local clients = vim.lsp.get_clients({ bufnr = 0 })
-        if #clients == 0 then
-          return
-        end
-
-        -- Check if any client supports codeAction
-        local has_codeaction = false
-        local encoding = "utf-8"
-        for _, client in ipairs(clients) do
-          encoding = client.offset_encoding or "utf-8"
-          if client.server_capabilities and client.server_capabilities.codeActionProvider then
-            has_codeaction = true
-            break
-          end
-        end
-
-        if not has_codeaction then
-          return
-        end
-
-        local params = vim.lsp.util.make_range_params(0, encoding)
-        params.context = { only = { "source.organizeImports" } }
-        local result = vim.lsp.buf_request_sync(0, "textDocument/codeAction", params, 1000)
-        for _, res in pairs(result or {}) do
-          for _, action in pairs(res.result or {}) do
-            if action.edit then
-              vim.lsp.util.apply_workspace_edit(action.edit, encoding)
-            elseif action.command then
-              pcall(vim.lsp.buf.execute_command, action.command)
-            end
-          end
-        end
-      end)
+    callback = function(event)
+      run_auto_import_actions(event and event.buf or 0)
     end,
     desc = "Auto-import and organize imports on save",
   })
@@ -252,69 +270,6 @@ function M.setup()
       end
     end,
     desc = "Check for config file changes on focus and restart LSP",
-  })
-
-  -- Restart LSP when project files change (new, deleted, modified)
-  autocmd({ "BufWritePost", "BufDelete", "BufNewFile" }, {
-    group = lsp_refresh_group,
-    callback = function(event)
-      local filename = vim.fn.fnamemodify(event.file, ":t")
-      local filepath = event.file
-
-      -- Get file extension
-      local ext = vim.fn.fnamemodify(filepath, ":e")
-
-      -- List of project-critical filetypes/patterns that should trigger LSP restart
-      local trigger_patterns = {
-        -- Python
-        "py", "toml", "txt",
-        -- TypeScript/JavaScript
-        "ts", "tsx", "js", "jsx", "json",
-        -- Go
-        "go", "mod", "sum",
-        -- Rust
-        "rs", "toml", "lock",
-        -- Scala
-        "scala", "sbt", "sc",
-        -- Lua
-        "lua",
-        -- Config files
-        "yaml", "yml", "env", "cfg", "ini", "conf"
-      }
-
-      -- Check if this file should trigger LSP restart
-      local should_restart = false
-      for _, pattern in ipairs(trigger_patterns) do
-        if ext == pattern then
-          should_restart = true
-          break
-        end
-      end
-
-      -- Also restart if file is in certain directories
-      if filepath:match("src/") or filepath:match("lib/") or filepath:match("tests/") or filepath:match("spec/") then
-        should_restart = true
-      end
-
-      if should_restart and event.event ~= "BufDelete" then
-        vim.defer_fn(function()
-          vim.notify("File change detected: " .. filename .. ". Restarting LSP (excluding Copilot)...", vim.log.levels.DEBUG)
-          restart_lsp_except_copilot()
-        end, 500)
-      end
-    end,
-    desc = "Restart LSP when project files change",
-  })
-
-  autocmd("BufFilePost", {
-    group = lsp_refresh_group,
-    callback = function(event)
-      vim.defer_fn(function()
-        vim.notify("File renamed/moved. Restarting LSP (excluding Copilot)...", vim.log.levels.DEBUG)
-        restart_lsp_except_copilot()
-      end, 500)
-    end,
-    desc = "Restart LSP when files are renamed or moved",
   })
 
   -- Auto-refresh quickfix list on diagnostics change

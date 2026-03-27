@@ -51,6 +51,15 @@ describe("core.autocmds", function()
       return nil
     end
 
+    local function find_autocmd_by_desc(state, desc)
+      for _, ac in ipairs(state.autocmds) do
+        if ac.opts and ac.opts.desc == desc then
+          return ac
+        end
+      end
+      return nil
+    end
+
     it("should create autocmds", function()
       require("core.autocmds")
       local state = spec_helper.vim_mock.get_state()
@@ -236,6 +245,20 @@ describe("core.autocmds", function()
       local ac = find_autocmd(state, "FocusGained")
       assert.is_not_nil(ac)
       assert.equals("checktime", ac.opts.command)
+    end)
+
+    it("should not restart LSP for ordinary project file saves", function()
+      require("core.autocmds")
+      local state = spec_helper.vim_mock.get_state()
+      local ac = find_autocmd_by_desc(state, "Restart LSP when project files change")
+      assert.is_nil(ac)
+    end)
+
+    it("should not restart LSP when files are renamed or moved", function()
+      require("core.autocmds")
+      local state = spec_helper.vim_mock.get_state()
+      local ac = find_autocmd_by_desc(state, "Restart LSP when files are renamed or moved")
+      assert.is_nil(ac)
     end)
   end)
 
@@ -429,6 +452,31 @@ describe("core.autocmds", function()
       local ac = find_autocmd_by_desc(state, "Auto-import and organize imports on save")
       ac.opts.callback()
       assert.is_true(command_executed)
+    end)
+
+    it("callback should request add-missing, organize, and fix-all actions", function()
+      local requested_kinds = {}
+      local request_bufnr
+      local request_uri
+      vim.lsp.buf_request_sync = function(bufnr, _, params)
+        request_bufnr = bufnr
+        request_uri = params.textDocument.uri
+        table.insert(requested_kinds, params.context.only[1])
+        return {}
+      end
+      require("core.autocmds")
+      local state = spec_helper.vim_mock.get_state()
+      local ac = find_autocmd_by_desc(state, "Auto-import and organize imports on save")
+      ac.opts.callback({ buf = 3 })
+
+      assert.equals(3, request_bufnr)
+      assert.equals("file:///tmp/3", request_uri)
+      assert.is_true(vim.tbl_contains(requested_kinds, "source.addMissingImports"))
+      assert.is_true(vim.tbl_contains(requested_kinds, "source.addMissingImports.ts"))
+      assert.is_true(vim.tbl_contains(requested_kinds, "source.organizeImports"))
+      assert.is_true(vim.tbl_contains(requested_kinds, "source.organizeImports.ts"))
+      assert.is_true(vim.tbl_contains(requested_kinds, "source.fixAll"))
+      assert.is_true(vim.tbl_contains(requested_kinds, "source.fixAll.ts"))
     end)
   end)
 end)

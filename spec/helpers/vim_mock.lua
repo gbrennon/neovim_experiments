@@ -153,6 +153,9 @@ local vim_mock = {
     buf_request_sync = function() return {} end,
     util = {
       make_range_params = function() return { context = {} } end,
+      make_text_document_params = function(bufnr)
+        return { uri = "file:///tmp/" .. tostring(bufnr or 0) }
+      end,
       make_position_params = function() return { textDocument = { uri = 'file:///tmp/1' }, position = { line = 0, character = 0 } } end,
       apply_workspace_edit = function() end,
       apply_text_edits = function(edits, bufnr, encoding)

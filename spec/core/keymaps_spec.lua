@@ -48,8 +48,8 @@ describe("core.keymaps", function()
       keymaps.setup()
       
       local expected_maps = {
-        { mode = "n", lhs = "<Tab>", rhs = ":bnext<CR>" },
-        { mode = "n", lhs = "<S-Tab>", rhs = ":bprevious<CR>" },
+        { mode = "n", lhs = "<leader>n", rhs = ":bnext<CR>" },
+        { mode = "n", lhs = "<leader>N", rhs = ":bprevious<CR>" },
         { mode = "n", lhs = "<leader>bd", rhs = ":bdelete<CR>" },
       }
       
@@ -129,6 +129,8 @@ describe("core.keymaps", function()
         { mode = "n", lhs = "n" },
         { mode = "n", lhs = "N" },
         { mode = "i", lhs = "jk" },
+        { mode = "i", lhs = "<Tab>" },
+        { mode = "i", lhs = "<S-Tab>" },
         { mode = "n", lhs = "<C-a>" },
       }
       
