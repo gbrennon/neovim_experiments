@@ -21,8 +21,10 @@ test:
 .PHONY: test-coverage
 test-coverage:
 	@echo "Running tests with coverage..."
-	@LUA_PATH="$(LUA_PATH)" $(BUSTED) --coverage spec/
-	@$(LUACOV)
+	@LUA_PATH="$(LUA_PATH)" $(BUSTED) spec/
+	@echo ""
+	@echo "Generating coverage report..."
+	@lua lua/spec/coverage.lua
 
 # Run linter
 .PHONY: lint

@@ -22,14 +22,33 @@ M.servers = {
   rust_analyzer = {
     cmd = { "rust-analyzer" },
     filetypes = { "rust" },
-    settings = { ["rust-analyzer"] = { assist = { importGranularity = "module", importPrefix = "by_self" }, cargo = { loadOutDirsFromCheck = true }, procMacro = { enable = true }, checkOnSave = true } },
+    settings = {
+      ["rust-analyzer"] = {
+        assist = {
+          importGranularity = "module",
+          importPrefix = "by_self",
+          importGroup = true
+        },
+        cargo = {
+          loadOutDirsFromCheck = true,
+          allTargets = true
+        },
+        procMacro = { enable = true },
+        checkOnSave = { command = "clippy" },
+        inlayHints = { enable = true }
+      }
+    },
   },
   gopls = {
     cmd = { "gopls" },
     filetypes = { "go", "gomod" },
     settings = { gopls = { gofumpt = true, staticcheck = true, analyses = { unusedparams = true, shadow = true } } },
   },
-  -- metals handled by nvim-metals plugin (see lua/plugins/metals.lua)
+  metals = {
+    cmd = { "metals" },
+    filetypes = { "scala", "sbt" },
+    settings = {},
+  },
   jsonls = { cmd = { "vscode-json-language-server", "--stdio" }, filetypes = { "json" }, settings = {} },
   yamlls = { cmd = { "yaml-language-server", "--stdio" }, filetypes = { "yaml" }, settings = {} },
   bashls = { cmd = { "bash-language-server", "start" }, filetypes = { "sh" }, settings = {} },
@@ -73,7 +92,7 @@ M.setup_servers = function(on_attach)
       pcall(vim.lsp.enable, name)
     else
       if type(vim.lsp) == "table" then
-        vim.lsp.enable = vim.lsp.enable or function(n) end
+        vim.lsp.enable = vim.lsp.enable or function(_) end
         pcall(vim.lsp.enable, name)
       end
     end
@@ -83,7 +102,7 @@ end
 M.config = function()
   local diag = require("core.diagnostics")
   diag.setup_display()
-  M.setup_servers(function(client, bufnr)
+  M.setup_servers(function(_, bufnr)
     local keymaps = require("core.keymaps")
     keymaps.lsp_on_attach(bufnr)
   end)

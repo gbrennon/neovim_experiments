@@ -1,15 +1,15 @@
-Temporary projects to verify LSP configurations.
+# Temporary projects to verify LSP configurations.
 
-Languages included:
+## Languages included:
 - python
 - typescript
 - rust
 - scala
 - go
 
-How to use:
-1. Open the desired project folder in Neovim (e.g., nvim tmp_projects/python).
-2. Ensure LSP servers are installed: pyright, typescript-language-server, rust-analyzer, metals, gopls.
+## How to use:
+1. Ensure LSP servers are installed: pyright, typescript-language-server, rust-analyzer, metals, gopls.
+2. Open the desired project folder in Neovim.
 3. Run :LspInfo to check attached servers and capabilities.
 4. Use <leader>rn to rename a symbol and verify references are updated across files.
 
