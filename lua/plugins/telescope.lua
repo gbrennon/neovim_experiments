@@ -52,6 +52,9 @@ return {
     local telescope = require("telescope")
     local actions = require("telescope.actions")
 
+    vim.api.nvim_set_hl(0, "TelescopeSelection", { fg = "#d65d0e", bg = "#2a2a2a", bold = true })
+    vim.api.nvim_set_hl(0, "TelescopeSelectionCaret", { fg = "#d65d0e" })
+
     telescope.setup({
       defaults = {
         path_display = path_display,

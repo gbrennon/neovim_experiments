@@ -11,6 +11,7 @@ M._state = {
   diagnostic_config = nil,
   lsp_configs = {},
   lsp_enabled = {},
+  highlights = {},
 }
 
 local function create_opt_proxy()
@@ -90,7 +91,22 @@ local vim_mock = {
       return name
     end,
     nvim_get_runtime_file = function() return {} end,
-    nvim_set_hl = function() end,
+    nvim_set_hl = function(ns, name, opts)
+      local converted = {}
+      if opts.fg then
+        converted.fg = type(opts.fg) == "string" and tonumber(opts.fg:gsub("#", ""), 16) or opts.fg
+      end
+      if opts.bg then
+        converted.bg = type(opts.bg) == "string" and tonumber(opts.bg:gsub("#", ""), 16) or opts.bg
+      end
+      if opts.bold then converted.bold = opts.bold end
+      if opts.cterm then converted.cterm = opts.cterm end
+      M._state.highlights[name] = converted
+    end,
+    nvim_get_hl = function(ns, opts)
+      local name = opts.name
+      return M._state.highlights[name] or {}
+    end,
     nvim_buf_get_mark = function() return { 0, 0 } end,
     nvim_buf_line_count = function() return 100 end,
     nvim_win_set_cursor = function() end,
@@ -270,6 +286,7 @@ function M.reset()
     lsp_configs = {},
     lsp_enabled = {},
     cmd_calls = {},
+    highlights = {},
   }
   vim_mock.opt = create_opt_proxy()
 end
