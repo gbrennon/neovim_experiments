@@ -267,7 +267,7 @@ describe("plugins.lsp", function()
 
     it("rust_analyzer should enable clippy on save", function()
       local spec = require("plugins.lsp")
-      assert.equals("clippy", spec._module.servers.rust_analyzer.settings["rust-analyzer"].checkOnSave.command)
+      assert.equals("clippy", spec._module.servers.rust_analyzer.settings["rust-analyzer"].cargo.checkOnSave.command)
     end)
 
     it("lua_ls should suppress vim global diagnostic", function()

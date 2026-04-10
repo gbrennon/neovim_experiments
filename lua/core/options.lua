@@ -25,8 +25,9 @@ function M.setup()
   opt.hlsearch = true
   opt.incsearch = true
 
-  -- Cursor line
+  -- Cursor line - match kitty cursor color #d65d0e
   opt.cursorline = true
+  opt.cursorlineopt = "screenline"
 
   -- Appearance
   opt.termguicolors = true

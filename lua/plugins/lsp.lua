@@ -31,10 +31,10 @@ M.servers = {
         },
         cargo = {
           loadOutDirsFromCheck = true,
-          allTargets = true
+          allTargets = true,
+          checkOnSave = { command = "clippy" }
         },
         procMacro = { enable = true },
-        checkOnSave = { command = "clippy" },
         inlayHints = { enable = true }
       }
     },

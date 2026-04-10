@@ -49,26 +49,21 @@ function M.config()
       { name = "path", priority = 250 },
     }),
 
-    formatting = {
-      format = function(entry, vim_item)
-        vim_item.menu = ({
-          nvim_lsp = "[LSP]",
-          luasnip = "[Snippet]",
-          buffer = "[Buffer]",
-          path = "[Path]",
-        })[entry.source.name]
-        return vim_item
-      end,
-    },
-
-    window = {
-      completion = cmp.config.window.bordered(),
-      documentation = cmp.config.window.bordered(),
-    },
-
     experimental = {
       ghost_text = true,
     },
+  })
+
+  vim.api.nvim_create_autocmd("User", {
+    pattern = "CmpConfirmDone",
+    callback = function(ctx)
+      local completion_item = ctx.data.completion_item
+      if completion_item and completion_item.additionalTextEdits and #completion_item.additionalTextEdits > 0 then
+        vim.schedule(function()
+          vim.lsp.util.apply_text_edits(completion_item.additionalTextEdits, ctx.buf, "utf-8")
+        end)
+      end
+    end,
   })
 
   -- Set configuration for specific filetype
