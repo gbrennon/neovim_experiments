@@ -55,7 +55,7 @@ function M.setup()
   ------------------------------------------------------------------------------
   map("n", "<F3>", ":NvimTreeToggle<CR>", { desc = "Toggle File Explorer" })
   map("n", "<leader>e", ":NvimTreeToggle<CR>", { desc = "Toggle File Explorer" })
-  map("n", "<leader>fe", ":NvimTreeFocus<CR>", { desc = "Focus File Explorer" })
+  map("n", "<leader>fe", ":NvimTreeFindFile<CR>", { desc = "Focus File Explorer" })
 
   ------------------------------------------------------------------------------
   -- Telescope
