@@ -17,7 +17,7 @@ function M.setup()
   map("n", "<leader>W", ":wa<CR>", { desc = "Save all files" })
   map("n", "<leader>Q", ":qa!<CR>", { desc = "Force quit all" })
   map("n", "<leader><Space>", ":nohlsearch<CR>", { desc = "Clear search highlights" })
-  map("n", "<leader>t", ":terminal", { desc = "Starts terminal session" })
+  map("n", "<leader>t", ":terminal<CR>", { desc = "Starts terminal session" })
 
   -- Toggle relative line numbers
   map("n", "<leader>trn", function()
