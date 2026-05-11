@@ -17,6 +17,7 @@ function M.setup()
   map("n", "<leader>W", ":wa<CR>", { desc = "Save all files" })
   map("n", "<leader>Q", ":qa!<CR>", { desc = "Force quit all" })
   map("n", "<leader><Space>", ":nohlsearch<CR>", { desc = "Clear search highlights" })
+  map("n", "<leader>t", ":terminal", { desc = "Starts terminal session" })
 
   -- Toggle relative line numbers
   map("n", "<leader>trn", function()
@@ -94,7 +95,7 @@ function M.setup()
   -- Provide a global fallback for K: prefer LSP hover when available, otherwise run the original keywordprg
   map("n", "K", function()
     -- Try LSP hover first and suppress errors; if it fails, notify instead of calling Man
-    local ok, ret = pcall(vim.lsp.buf.hover)
+    local ok, _ = pcall(vim.lsp.buf.hover)
     if ok then
       return
     end
@@ -172,7 +173,7 @@ function M.lsp_on_attach(bufnr)
     end
 
     for uri, edits in pairs(edits_by_uri) do
-      local bufnr = vim.uri_to_bufnr(uri)
+      local _ = vim.uri_to_bufnr(uri)
       if not vim.api.nvim_buf_is_loaded(bufnr) then
         pcall(vim.fn.bufload, bufnr)
       end
