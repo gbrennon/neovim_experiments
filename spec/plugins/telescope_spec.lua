@@ -146,4 +146,24 @@ describe("plugins.telescope", function()
       assert.equals(actions_mock.close, i_maps["<esc>"])
     end)
   end)
+
+  --------------------------------------------------------------------------
+  -- Color customization (matching kitty cursor #d65d0e)
+  --------------------------------------------------------------------------
+
+  describe("color customization", function()
+    it("should set TelescopeSelection to orange (#d65d0e)", function()
+      spec.config()
+      local hl = vim.api.nvim_get_hl(0, { name = "TelescopeSelection" })
+      assert.equals("#d65d0e", string.format("#%06x", hl.fg))
+      assert.equals("#2a2a2a", string.format("#%06x", hl.bg))
+      assert.equals(true, hl.bold)
+    end)
+
+    it("should set TelescopeSelectionCaret to orange (#d65d0e)", function()
+      spec.config()
+      local hl = vim.api.nvim_get_hl(0, { name = "TelescopeSelectionCaret" })
+      assert.equals("#d65d0e", string.format("#%06x", hl.fg))
+    end)
+  end)
 end)

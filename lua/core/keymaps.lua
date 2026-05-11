@@ -56,7 +56,7 @@ function M.setup()
   ------------------------------------------------------------------------------
   map("n", "<F3>", ":NvimTreeToggle<CR>", { desc = "Toggle File Explorer" })
   map("n", "<leader>e", ":NvimTreeToggle<CR>", { desc = "Toggle File Explorer" })
-  map("n", "<leader>fe", ":NvimTreeFocus<CR>", { desc = "Focus File Explorer" })
+  map("n", "<leader>fe", ":NvimTreeFindFile<CR>", { desc = "Focus File Explorer" })
 
   ------------------------------------------------------------------------------
   -- Telescope
@@ -68,6 +68,7 @@ function M.setup()
   map("n", "<leader>fr", "<cmd>Telescope oldfiles<CR>", { desc = "Recent Files" })
   map("n", "<leader>fc", "<cmd>Telescope commands<CR>", { desc = "Commands" })
   map("n", "<leader>fk", "<cmd>Telescope keymaps<CR>", { desc = "Keymaps" })
+  map("n", "<leader>ft", ":NvimTreeFindFile<CR>")
 
   ------------------------------------------------------------------------------
   -- Visual mode
@@ -88,6 +89,8 @@ function M.setup()
   map("n", "n", "nzzzv", { desc = "Next search result centered" })
   map("n", "N", "Nzzzv", { desc = "Previous search result centered" })
   map("i", "jk", "<Esc>", { desc = "Exit insert mode" })
+  map("i", "<Tab>", "<C-t>", { desc = "Increase indent" })
+  map("i", "<S-Tab>", "<C-d>", { desc = "Decrease indent" })
 
   -- Provide a global fallback for K: prefer LSP hover when available, otherwise run the original keywordprg
   map("n", "K", function()
